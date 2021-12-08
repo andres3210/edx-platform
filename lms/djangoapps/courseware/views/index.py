@@ -45,6 +45,7 @@ from openedx.features.course_experience import (
 from openedx.features.course_experience.views.course_sock import CourseSockFragmentView
 from openedx.features.course_experience.url_helpers import make_learning_mfe_courseware_url
 from openedx.features.enterprise_support.api import data_sharing_consent_required
+from openedx.features.course_experience.views.course_outline import CourseOutlineFragmentView
 from common.djangoapps.student.models import CourseEnrollment
 from common.djangoapps.util.views import ensure_valid_course_key
 from xmodule.course_module import COURSE_VISIBILITY_PUBLIC
@@ -503,6 +504,10 @@ class CoursewareIndex(View):
             courseware_context['microfrontend_link'] = self.microfrontend_url
         else:
             courseware_context['microfrontend_link'] = None
+
+        courseware_context['outline_fragment'] = CourseOutlineFragmentView().render_to_fragment(
+            request, course_id=str(self.course.id)
+        )
 
         return courseware_context
 
