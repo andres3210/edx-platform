@@ -47,7 +47,7 @@ class CourseOutlineFragmentView(EdxFragmentView):
     Course outline fragment to be shown in the unified course view.
     """
 
-    def render_to_fragment(self, request, course_id, user_is_enrolled=True, **kwargs):  # pylint: disable=arguments-differ
+    def render_to_fragment(self, request, course_id, user_is_enrolled=True, template_name='course-outline-fragment.html', **kwargs):  # pylint: disable=arguments-differ
         """
         Renders the course outline as a fragment.
         """
@@ -100,7 +100,9 @@ class CourseOutlineFragmentView(EdxFragmentView):
             'has_ended': course.has_ended(),
         }
 
-        html = render_to_string('course_experience/course-outline-fragment.html', context)
+        # ABNK custom code {{{
+        html = render_to_string('course_experience/'+template_name, context)
+        # ABNK custom code }}}
         return Fragment(html)
 
     def create_xblock_id_and_name_dict(self, course_block_tree, xblock_display_names=None):
