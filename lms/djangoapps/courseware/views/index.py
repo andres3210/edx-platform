@@ -517,7 +517,7 @@ class CoursewareIndex(View):
         user_is_enrolled = False if allow_public_outline or allow_public else True
 
         courseware_context['outline_fragment'] = CourseOutlineFragmentView().render_to_fragment(
-            request, course_id=course_id, user_is_enrolled=user_is_enrolled, template_name='courseware-course-outline-fragment.html'
+            request, course_id=course_id, user_is_enrolled=user_is_enrolled, template_name='courseware-course-outline-fragment'
         )
         # ABNK custom code }}}
 
