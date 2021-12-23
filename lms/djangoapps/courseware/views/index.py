@@ -514,7 +514,10 @@ class CoursewareIndex(View):
         allow_public = allow_anonymous and self.course.course_visibility == COURSE_VISIBILITY_PUBLIC
         allow_public_outline = allow_anonymous and self.course.course_visibility == COURSE_VISIBILITY_PUBLIC_OUTLINE
 
-        user_is_enrolled = False if allow_public_outline or allow_public else True
+        if allow_public_outline or allow_public:
+            user_is_enrolled = False
+        else:
+            user_is_enrolled = True
 
         courseware_context['outline_fragment'] = CourseOutlineFragmentView().render_to_fragment(
             request, course_id=course_id, user_is_enrolled=user_is_enrolled
