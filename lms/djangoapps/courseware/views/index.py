@@ -464,6 +464,13 @@ class CoursewareIndex(View):
             table_of_contents['chapters'],
         )
 
+        courseware_context['custom_accordion'] = render_accordion(
+            self.request,
+            self.course,
+            table_of_contents['chapters'],
+            'custom_accordion.html'
+        )
+
         courseware_context['course_sock_fragment'] = CourseSockFragmentView().render_to_fragment(
             request, course=self.course)
 
@@ -567,7 +574,7 @@ class CoursewareIndex(View):
         return section_context
 
 
-def render_accordion(request, course, table_of_contents):
+def render_accordion(request, course, table_of_contents, template_name='accordion.html'):
     """
     Returns the HTML that renders the navigation for the given course.
     Expects the table_of_contents to have data on each chapter and section,
@@ -581,7 +588,7 @@ def render_accordion(request, course, table_of_contents):
             ('due_date_display_format', course.due_date_display_format),
         ] + list(TEMPLATE_IMPORTS.items())
     )
-    return render_to_string('courseware/accordion.html', context)
+    return render_to_string('courseware/'+template_name, context)
 
 
 def save_child_position(seq_module, child_name):
