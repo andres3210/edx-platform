@@ -48,7 +48,7 @@ from openedx.features.enterprise_support.api import data_sharing_consent_require
 from openedx.features.course_experience.views.course_outline import CourseOutlineFragmentView
 from common.djangoapps.student.models import CourseEnrollment
 from common.djangoapps.util.views import ensure_valid_course_key
-from xmodule.course_module import COURSE_VISIBILITY_PUBLIC, COURSE_VISIBILITY_PUBLIC_OUTLINE
+from xmodule.course_module import COURSE_VISIBILITY_PUBLIC
 from xmodule.modulestore.django import modulestore
 from xmodule.x_module import PUBLIC_VIEW, STUDENT_VIEW
 
@@ -139,10 +139,10 @@ class CoursewareIndex(View):
 
                 # There's only one situation where we want to show the public view
                 if (
-                    not self.is_staff and
-                    self.enable_unenrolled_access and
-                    self.course.course_visibility == COURSE_VISIBILITY_PUBLIC and
-                    not CourseEnrollment.is_enrolled(request.user, self.course_key)
+                        not self.is_staff and
+                        self.enable_unenrolled_access and
+                        self.course.course_visibility == COURSE_VISIBILITY_PUBLIC and
+                        not CourseEnrollment.is_enrolled(request.user, self.course_key)
                 ):
                     self.view = PUBLIC_VIEW
 
@@ -177,9 +177,9 @@ class CoursewareIndex(View):
         """
         # STAY: if the course run as a whole is visible in the Legacy experience.
         if courseware_legacy_is_visible(
-            course_key=self.course_key,
-            is_global_staff=self.request.user.is_staff,
-            is_course_staff=self.is_staff,
+                course_key=self.course_key,
+                is_global_staff=self.request.user.is_staff,
+                is_course_staff=self.is_staff,
         ):
             return
         # STAY: if we are in a special (ie proctored/timed) exam, which isn't yet
@@ -265,8 +265,8 @@ class CoursewareIndex(View):
         and error logs have the appropriate URLs.
         """
         if (
-            self.chapter.url_name != self.original_chapter_url_name or
-            (self.original_section_url_name and self.section.url_name != self.original_section_url_name)
+                self.chapter.url_name != self.original_chapter_url_name or
+                (self.original_section_url_name and self.section.url_name != self.original_section_url_name)
         ):
             raise CourseAccessRedirect(
                 reverse(
@@ -287,8 +287,7 @@ class CoursewareIndex(View):
             try:
                 self.position = max(int(self.position), 1)
             except ValueError:
-                raise Http404(
-                    f"Position {self.position} is not an integer!")  # lint-amnesty, pylint: disable=raise-missing-from
+                raise Http404(f"Position {self.position} is not an integer!")  # lint-amnesty, pylint: disable=raise-missing-from
 
     def _reset_section_to_exam_if_required(self):
         """
@@ -498,31 +497,17 @@ class CoursewareIndex(View):
 
         # Courseware MFE link
         if courseware_mfe_is_advertised(
-            is_global_staff=request.user.is_staff,
-            is_course_staff=staff_access,
-            course_key=self.course.id,
+                is_global_staff=request.user.is_staff,
+                is_course_staff=staff_access,
+                course_key=self.course.id,
         ):
             courseware_context['microfrontend_link'] = self.microfrontend_url
         else:
             courseware_context['microfrontend_link'] = None
 
-        # ABNK custom code {{{
-        course_key = self.course.id
-        course_id = str(course_key)
-
-        allow_anonymous = COURSE_ENABLE_UNENROLLED_ACCESS_FLAG.is_enabled(course_key)
-        allow_public = allow_anonymous and self.course.course_visibility == COURSE_VISIBILITY_PUBLIC
-        allow_public_outline = allow_anonymous and self.course.course_visibility == COURSE_VISIBILITY_PUBLIC_OUTLINE
-
-        if allow_public_outline or allow_public:
-            user_is_enrolled = False
-        else:
-            user_is_enrolled = True
-
         courseware_context['outline_fragment'] = CourseOutlineFragmentView().render_to_fragment(
-            request, course_id=course_id, user_is_enrolled=user_is_enrolled
+            request, course_id=str(self.course.id)
         )
-        # ABNK custom code }}}
 
         return courseware_context
 
@@ -556,7 +541,6 @@ class CoursewareIndex(View):
         """
         Returns and creates the rendering context for the section.
         """
-
         def _compute_section_url(section_info, requested_child):
             """
             Returns the section URL for the given section_info with the given child parameter.
