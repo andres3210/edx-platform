@@ -464,12 +464,14 @@ class CoursewareIndex(View):
             table_of_contents['chapters'],
         )
 
+        # ARTY custom code {{{
         courseware_context['custom_accordion'] = render_accordion(
             self.request,
             self.course,
             table_of_contents['chapters'],
             'custom_accordion.html'
         )
+        # }}}
 
         courseware_context['course_sock_fragment'] = CourseSockFragmentView().render_to_fragment(
             request, course=self.course)
