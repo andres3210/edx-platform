@@ -527,7 +527,9 @@ class SequenceBlock(
             'gated_content': self._get_gated_content_info(prereq_met, prereq_meta_info),
             'sequence_name': self.display_name,
             'exclude_units': context.get('exclude_units', False),
-            'gated_sequence_paywall': self.gated_sequence_paywall
+            'gated_sequence_paywall': self.gated_sequence_paywall,
+            'previous_section_name': context.get('previous_section_name'),
+            'next_section_name': context.get('next_section_name')
         }
 
         return params
