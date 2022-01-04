@@ -2,7 +2,6 @@
 Dashboard view and supporting methods
 """
 
-
 import datetime
 import logging
 from collections import defaultdict
@@ -58,6 +57,9 @@ from common.djangoapps.student.models import (
 )
 from common.djangoapps.util.milestones_helpers import get_pre_requisite_courses_not_completed
 from xmodule.modulestore.django import modulestore
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
+from cms.djangoapps.models.settings.course_metadata import CourseMetadata
+import ipdb
 
 log = logging.getLogger("edx.student")
 
@@ -109,7 +111,8 @@ def _get_recently_enrolled_courses(course_enrollments):
     ]
 
 
-def _create_recent_enrollment_message(course_enrollments, course_modes):  # lint-amnesty, pylint: disable=unused-argument
+def _create_recent_enrollment_message(course_enrollments,
+                                      course_modes):  # lint-amnesty, pylint: disable=unused-argument
     """
     Builds a recent course enrollment message.
 
@@ -733,7 +736,7 @@ def student_dashboard(request):  # lint-amnesty, pylint: disable=too-many-statem
 
     valid_verification_statuses = ['approved', 'must_reverify', 'pending', 'expired']
     display_sidebar_on_dashboard = verification_status['status'] in valid_verification_statuses and \
-        verification_status['should_display']
+                                   verification_status['should_display']
 
     # Filter out any course enrollment course cards that are associated with fulfilled entitlements
     for entitlement in [e for e in course_entitlements if e.enrollment_course_run is not None]:
@@ -784,7 +787,7 @@ def student_dashboard(request):  # lint-amnesty, pylint: disable=too-many-statem
         'disable_courseware_js': True,
         'display_course_modes_on_dashboard': enable_verified_certificates and display_course_modes_on_dashboard,
         'display_sidebar_on_dashboard': display_sidebar_on_dashboard,
-        'display_sidebar_account_activation_message': not(user.is_active or hide_dashboard_courses_until_activated),
+        'display_sidebar_account_activation_message': not (user.is_active or hide_dashboard_courses_until_activated),
         'display_dashboard_courses': (user.is_active or not hide_dashboard_courses_until_activated),
         'empty_dashboard_message': empty_dashboard_message,
         'recovery_email_message': recovery_email_message,
@@ -826,4 +829,23 @@ def student_dashboard(request):  # lint-amnesty, pylint: disable=too-many-statem
         'resume_button_urls': resume_button_urls
     })
 
+    # ARTY custom code {{{
+    context['student_dashboard_slider_courses'] = _student_dashboard_slider_courses()
+    # }}}
+
     return render_to_response('dashboard.html', context)
+
+
+def _student_dashboard_slider_courses():
+    """
+    ARTY custom code
+    Returns a list of courses with `student_dashboard_show_in_slider` flag
+    """
+    courses = list()
+
+    for course in modulestore().get_courses():
+        student_dashboard_show_in_slider = course.other_course_settings.get('student_dashboard_show_in_slider')
+        if student_dashboard_show_in_slider:
+            courses.append(course)
+
+    return courses
