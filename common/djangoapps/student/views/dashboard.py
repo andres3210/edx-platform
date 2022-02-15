@@ -57,9 +57,6 @@ from common.djangoapps.student.models import (
 )
 from common.djangoapps.util.milestones_helpers import get_pre_requisite_courses_not_completed
 from xmodule.modulestore.django import modulestore
-from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
-from cms.djangoapps.models.settings.course_metadata import CourseMetadata
-import ipdb
 
 log = logging.getLogger("edx.student")
 
