@@ -2,7 +2,6 @@
 Student Views
 """
 
-
 import datetime
 import logging
 import uuid
@@ -23,7 +22,8 @@ from django.template.context_processors import csrf
 from django.urls import reverse
 from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie  # lint-amnesty, pylint: disable=unused-import
-from django.views.decorators.http import require_GET, require_http_methods, require_POST  # lint-amnesty, pylint: disable=unused-import
+from django.views.decorators.http import require_GET, require_http_methods, \
+    require_POST  # lint-amnesty, pylint: disable=unused-import
 from edx_ace import ace
 from edx_ace.recipient import Recipient
 from edx_django_utils import monitoring as monitoring_utils
@@ -38,7 +38,8 @@ from common.djangoapps.track import views as track_views
 from lms.djangoapps.bulk_email.models import Optout
 from common.djangoapps.course_modes.models import CourseMode
 from lms.djangoapps.courseware.courses import get_courses, sort_by_announcement, sort_by_start_date
-from common.djangoapps.edxmako.shortcuts import marketing_link, render_to_response, render_to_string  # lint-amnesty, pylint: disable=unused-import
+from common.djangoapps.edxmako.shortcuts import marketing_link, render_to_response, \
+    render_to_string  # lint-amnesty, pylint: disable=unused-import
 from common.djangoapps.entitlements.models import CourseEntitlement
 from openedx.core.djangoapps.ace_common.template_context import get_base_template_context
 from openedx.core.djangoapps.catalog.utils import get_programs_with_type
@@ -52,7 +53,8 @@ from openedx.core.djangoapps.user_authn.toggles import should_redirect_to_authn_
 from openedx.core.djangolib.markup import HTML, Text
 from common.djangoapps.student.email_helpers import generate_activation_email_context
 from common.djangoapps.student.helpers import DISABLE_UNENROLL_CERT_STATES, cert_info
-from common.djangoapps.student.message_types import AccountActivation, EmailChange, EmailChangeConfirmation, RecoveryEmailCreate  # lint-amnesty, pylint: disable=line-too-long
+from common.djangoapps.student.message_types import AccountActivation, EmailChange, EmailChangeConfirmation, \
+    RecoveryEmailCreate  # lint-amnesty, pylint: disable=line-too-long
 from common.djangoapps.student.models import (  # lint-amnesty, pylint: disable=unused-import
     AccountRecovery,
     CourseEnrollment,
@@ -159,7 +161,26 @@ def index(request, extra_context=None, user=AnonymousUser()):
     # Add marketable programs to the context.
     context['programs_list'] = get_programs_with_type(request.site, include_hidden=False)
 
+    # ARTY custom code {{{
+    context['homepage_slider_courses'] = _homepage_slider_courses()
+    # }}}
+
     return render_to_response('index.html', context)
+
+
+def _homepage_slider_courses():
+    """
+    ARTY custom code
+    Returns a list of courses with `homepage_show_in_slider` flag
+    """
+    courses = list()
+
+    for course in modulestore().get_courses():
+        homepage_show_in_slider = course.other_course_settings.get('homepage_show_in_slider')
+        if homepage_show_in_slider:
+            courses.append(course)
+
+    return courses
 
 
 def compose_activation_email(root_url, user, user_registration=None, route_enabled=False, profile_name=''):
@@ -690,7 +711,8 @@ def do_email_change_request(user, new_email, activation_key=None, secondary_emai
     except Exception:
         from_address = configuration_helpers.get_value('email_from_address', settings.DEFAULT_FROM_EMAIL)
         log.error('Unable to send email activation link to user from "%s"', from_address, exc_info=True)
-        raise ValueError(_('Unable to send email activation link. Please try again later.'))  # lint-amnesty, pylint: disable=raise-missing-from
+        raise ValueError(
+            _('Unable to send email activation link. Please try again later.'))  # lint-amnesty, pylint: disable=raise-missing-from
 
     if not secondary_email_change_request:
         # When the email address change is complete, a "edx.user.settings.changed" event will be emitted.

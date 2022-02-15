@@ -829,23 +829,4 @@ def student_dashboard(request):  # lint-amnesty, pylint: disable=too-many-statem
         'resume_button_urls': resume_button_urls
     })
 
-    # ARTY custom code {{{
-    context['student_dashboard_slider_courses'] = _student_dashboard_slider_courses()
-    # }}}
-
     return render_to_response('dashboard.html', context)
-
-
-def _student_dashboard_slider_courses():
-    """
-    ARTY custom code
-    Returns a list of courses with `student_dashboard_show_in_slider` flag
-    """
-    courses = list()
-
-    for course in modulestore().get_courses():
-        student_dashboard_show_in_slider = course.other_course_settings.get('student_dashboard_show_in_slider')
-        if student_dashboard_show_in_slider:
-            courses.append(course)
-
-    return courses
