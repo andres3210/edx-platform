@@ -2,7 +2,7 @@
 Module rendering
 """
 
-
+from pprint import pprint
 import json
 import logging
 import textwrap
@@ -219,6 +219,7 @@ def toc_for_course(user, request, course, active_chapter, active_section, field_
                     'due': section.due,
                     'active': is_section_active,
                     'graded': section.graded,
+                    'chapterNames': [modulestore().get_item(unit).display_name for unit in section.children]
                 }
                 _add_timed_exam_info(user, course, section, section_context)
 
