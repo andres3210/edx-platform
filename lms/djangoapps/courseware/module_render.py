@@ -112,6 +112,7 @@ XQUEUE_INTERFACE = XQueueInterface(
     REQUESTS_AUTH,
 )
 
+
 # TODO: course_id and course_key are used interchangeably in this file, which is wrong.
 # Some brave person should make the variable names consistently someday, but the code's
 # coupled enough that it's kind of tricky--you've been warned!
@@ -133,6 +134,7 @@ def make_track_function(request):
 
     def function(event_type, event):
         return track_views.server_track(request, event_type, event, page='x_module')
+
     return function
 
 
@@ -220,7 +222,7 @@ def toc_for_course(user, request, course, active_chapter, active_section, field_
                     'active': is_section_active,
                     'graded': section.graded,
                     # ARTY custom code {{{
-                    'chapterNames': [modulestore().get_item(unit).display_name for unit in section.children]
+                    'units': [{'name': modulestore().get_item(unit).display_name} for unit in section.children]
                     # }}}
                 }
                 _add_timed_exam_info(user, course, section, section_context)
@@ -437,22 +439,22 @@ def get_module_for_descriptor(user, request, descriptor, field_data_cache, cours
 
 
 def get_module_system_for_user(
-        user,
-        student_data,  # TODO
-        # Arguments preceding this comment have user binding, those following don't
-        descriptor,
-        course_id,
-        track_function,
-        xqueue_callback_url_prefix,
-        request_token,
-        position=None,
-        wrap_xmodule_display=True,
-        grade_bucket_type=None,
-        static_asset_path='',
-        user_location=None,
-        disable_staff_debug_info=False,
-        course=None,
-        will_recheck_access=False,
+    user,
+    student_data,  # TODO
+    # Arguments preceding this comment have user binding, those following don't
+    descriptor,
+    course_id,
+    track_function,
+    xqueue_callback_url_prefix,
+    request_token,
+    position=None,
+    wrap_xmodule_display=True,
+    grade_bucket_type=None,
+    static_asset_path='',
+    user_location=None,
+    disable_staff_debug_info=False,
+    course=None,
+    will_recheck_access=False,
 ):
     """
     Helper function that returns a module system and student_data bound to a user and a descriptor.
@@ -1066,7 +1068,8 @@ def handle_xblock_callback(request, course_id, usage_id, handler, suffix=None):
         try:
             course = modulestore().get_course(course_key)
         except ItemNotFoundError:
-            raise Http404(f'{course_id} does not exist in the modulestore')  # lint-amnesty, pylint: disable=raise-missing-from
+            raise Http404(
+                f'{course_id} does not exist in the modulestore')  # lint-amnesty, pylint: disable=raise-missing-from
 
         return _invoke_xblock_handler(request, course_id, usage_id, handler, suffix, course=course)
 
@@ -1196,9 +1199,9 @@ def _invoke_xblock_handler(request, course_id, usage_id, handler, suffix, course
                     handler_instance = instance
                 resp = handler_instance.handle(handler, req, suffix)
                 if suffix == 'problem_check' \
-                        and course \
-                        and getattr(course, 'entrance_exam_enabled', False) \
-                        and getattr(instance, 'in_entrance_exam', False):
+                    and course \
+                    and getattr(course, 'entrance_exam_enabled', False) \
+                    and getattr(instance, 'in_entrance_exam', False):
                     ee_data = {'entrance_exam_passed': user_has_passed_entrance_exam(request.user, course)}
                     resp = append_data_to_webob_response(resp, ee_data)
 
